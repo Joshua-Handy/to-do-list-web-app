@@ -12,5 +12,6 @@ Mark Rodriguez
 ## Agile Planning
 
 # User Stories
+Refer to the text file userstories.txt
 # Sprints
 Sprint 1: Create the Github repository for the Web application, the application environment, and user stories 
