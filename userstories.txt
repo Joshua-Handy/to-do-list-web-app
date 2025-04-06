@@ -1,0 +1,15 @@
+Epic 1: Task Management
+User Story 1:
+ As an admin, I want to create and delete tasks for all users so that I can manage the to-do list efficiently.
+User Story 2 :
+ As a user, I want to create and edit my own tasks so that I can manage my responsibilities.
+Epic 2: User and Collaboration Management
+User Story 1:
+ As an admin, I want to assign tasks to specific users so that I can ensure work is properly distributed.
+User Story 2:
+ As a user, I want to view and accept tasks assigned to me so that I know what I need to work on.
+Epic 3: Task Status and Progress Tracking
+User Story 1:
+ As an admin, I want to track the progress of all tasks so that I can monitor the overall project status.
+User Story 2 :
+ As a user, I want to update the status of my tasks so that I can reflect progress on my work.
