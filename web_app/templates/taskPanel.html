@@ -19,12 +19,18 @@
         <div class="mb-3">
             {% if showing_completed %}
                 <strong>Showing: Completed Tasks</strong>
-                <a href="{% url 'home' %}">Show All Tasks</a>
+                <form action="{% url 'home' %}" method="get" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-secondary ms-2">Show All Tasks</button>
+                </form>
             {% else %}
                 <strong>Showing: All Tasks</strong>
-                <a href="?completed=true" class="ms-2">Show Completed Tasks</a>
+                <form method="get" style="display:inline;">
+                    <input type="hidden" name="completed" value="true">
+                    <button type="submit" class="btn btn-sm btn-secondary ms-2">Show Completed Tasks</button>
+                </form>
             {% endif %}
         </div>
+
 
         <!-- Display Messages -->
         {% if messages %}
@@ -52,7 +58,7 @@
                 </thead>
                 <tbody>
                     {% for task in tasks %}
-                        <tr>
+                        <tr class="{% if task.is_due_soon %}table-danger{% endif %}">
                             <td>{{ task.name }}</td>
                             <td>{{ task.due_date }}</td>
                             <td>{{ task.description }}</td>

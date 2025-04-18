@@ -4,6 +4,7 @@ import datetime
 from .models import todolist  # Use the correct model name
 from .forms import TodoListForm  # Make sure the form matches the model
 from django.contrib import messages
+from datetime import date, timedelta
 
 # View for home page
 
@@ -29,6 +30,12 @@ def home(request):
     if showing_completed:
         tasks = tasks.filter(status='Completed')
 
+    for task in tasks:
+        if task.due_date:
+            task.is_due_soon = (task.due_date - date.today()).days <= 3
+        else:
+            task.is_due_soon = False
+
     delete_id = request.GET.get('delete_id')
     if delete_id:
         todolist.objects.filter(id=delete_id).delete()
@@ -44,3 +51,4 @@ def home(request):
 
 def login(request):
     return render(request, 'login.html')
+
