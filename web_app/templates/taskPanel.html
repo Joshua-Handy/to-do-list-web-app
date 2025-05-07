@@ -22,14 +22,24 @@
                 <form action="{% url 'home' %}" method="get" style="display:inline;">
                     <button type="submit" class="btn btn-sm btn-secondary ms-2">Show All Tasks</button>
                 </form>
+            {% elif showing_pending %}
+                <strong>Showing: Pending Tasks</strong>
+                <form action="{% url 'home' %}" method="get" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-secondary ms-2">Show All Tasks</button>
+                </form>
             {% else %}
                 <strong>Showing: All Tasks</strong>
                 <form method="get" style="display:inline;">
                     <input type="hidden" name="completed" value="true">
                     <button type="submit" class="btn btn-sm btn-secondary ms-2">Show Completed Tasks</button>
                 </form>
+                <form method="get" style="display:inline;">
+                    <input type="hidden" name="pending" value="true">
+                    <button type="submit" class="btn btn-sm btn-secondary ms-2">Show Pending Tasks</button>
+                </form>
             {% endif %}
         </div>
+        
 
 
         <!-- Display Messages -->
@@ -48,6 +58,7 @@
             <table class="table table-striped table-bordered align-middle">
                 <thead class="table-dark">
                     <tr>
+                        <th>ID</th>
                         <th>Name</th>
                         <th>Due Date</th>
                         <th>Description</th>
@@ -55,10 +66,11 @@
                         <th>People Involved</th>
                         <th>Actions</th>
                     </tr>
-                </thead>
+                </thead> 
                 <tbody>
                     {% for task in tasks %}
-                        <tr class="{% if task.is_due_soon %}table-danger{% endif %}">
+                    <tr class="{% if task.is_completed %}table-success {% elif task.is_due_soon %}table-danger{% endif %}">
+                            <td>{{ task.id }}</td>
                             <td>{{ task.name }}</td>
                             <td>{{ task.due_date }}</td>
                             <td>{{ task.description }}</td>
@@ -81,12 +93,12 @@
             </table>
         </div>
 
-        <!-- Add New Task Button -->
+        
         <div class="mb-4">
             <button class="btn btn-success" onclick="toggleForm()">+ Add New Task</button>
         </div>
 
-        <!-- Task Form (Initially Hidden) -->
+       
         <div id="taskForm" class="border p-4 rounded bg-light mb-5">
             <h4 class="mb-3" id="formTitle">Add / Edit Task</h4>
             <form method="post" action="{% url 'home' %}">

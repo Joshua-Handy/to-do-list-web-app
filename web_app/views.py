@@ -26,7 +26,7 @@ def home(request):
         form = TodoListForm()
 
     tasks = todolist.objects.all()
-    showing_completed = request.GET.get('completed') == 'true'
+    showing_completed = request.GET.get('completed' ) == 'true'
     if showing_completed:
         tasks = tasks.filter(status='Completed')
 
@@ -35,6 +35,8 @@ def home(request):
             task.is_due_soon = (task.due_date - date.today()).days <= 3
         else:
             task.is_due_soon = False
+
+        task.is_completed = (task.status == 'Completed' or task.status == 'completed')
 
     delete_id = request.GET.get('delete_id')
     if delete_id:
