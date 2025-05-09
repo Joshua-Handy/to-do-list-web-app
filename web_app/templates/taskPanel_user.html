@@ -64,13 +64,13 @@
             <td>{{ task.status }}</td>
             <td>{{ task.people_involved }}</td>
             <td>
-              {% if task.status != "Completed" %}
-                <button type="button" class="btn btn-sm btn-warning" onclick="editStatus(
-                    '{{ task.id }}',
-                    '{{ task.status }}'
-                )">Edit</button>
-              {% else %}
-                <button type="button" class="btn btn-sm btn-secondary" disabled>Completed</button>
+              <button type="button" class="btn btn-sm btn-warning" onclick="editStatus(
+                '{{ task.id }}',
+                '{{ task.status }}'
+              )">Edit</button>
+
+              {% if task.status == "Completed" %}
+                <button type="button" class="btn btn-sm btn-success ms-2" disabled>Completed</button>
               {% endif %}
             </td>
           </tr>

@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 from django.contrib import messages
 from .models import todolist
 from .forms import TodoListForm
@@ -16,7 +18,9 @@ def login_view(request):
 
         if user is not None:
             auth_login(request, user)
-            if user.is_staff:
+            if user.is_superuser:
+                return redirect('/admin/')
+            elif user.is_staff:
                 return redirect('task_panel_admin')
             else:
                 return redirect('task_panel_user')
@@ -35,7 +39,11 @@ def task_panel_admin(request):
             if task_id:
                 task = todolist.objects.get(pk=task_id)
                 form = TodoListForm(request.POST, instance=task)
-            form.save()
+            new_task = form.save(commit=False)
+            user_id = request.POST.get('assigned_to')
+            if user_id:
+                new_task.assigned_to = User.objects.get(id=user_id)
+            new_task.save()
             messages.success(request, "Task saved successfully!")
             return redirect('task_panel_admin')
         else:
@@ -70,12 +78,13 @@ def task_panel_admin(request):
         'tasks': tasks,
         'showing_completed': showing_completed,
         'showing_pending': showing_pending,
+        'users': User.objects.all(),
     })
 
 
 @login_required
 def task_panel_user(request):
-    tasks = todolist.objects.all()
+    tasks = todolist.objects.filter(assigned_to=request.user)
 
     showing_completed = request.GET.get('completed') == 'true'
     showing_pending = request.GET.get('pending') == 'true'
@@ -97,7 +106,7 @@ def task_panel_user(request):
         new_status = request.POST.get('status')
         if task_id and new_status:
             try:
-                task = todolist.objects.get(pk=task_id)
+                task = todolist.objects.get(pk=task_id, assigned_to=request.user)
                 task.status = new_status
                 task.save()
                 messages.success(request, f"Task {task.name} updated.")
@@ -110,3 +119,15 @@ def task_panel_user(request):
         'showing_completed': showing_completed,
         'showing_pending': showing_pending,
     })
+
+def signup(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Account created successfully! You can now log in.')
+            return redirect('login')  
+    else:
+        form = UserCreationForm()
+    return render(request, 'signup.html', {'form': form})
+

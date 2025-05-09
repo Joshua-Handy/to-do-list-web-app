@@ -10,6 +10,13 @@
         
       </ul>
 
+      
+      {% if user.is_authenticated %}
+        <span class="navbar-text text-white me-3">
+          Logged in as: {{ user.username }}
+        </span>
+      {% endif %}
+
       <form class="d-flex" action="{% url 'login' %}" method="get">
         <button class="btn btn-outline-light" type="submit">Log Out</button>
       </form>
