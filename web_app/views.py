@@ -38,10 +38,11 @@ def task_panel_admin(request):
                 task = todolist.objects.get(pk=task_id)
                 form = TodoListForm(request.POST, instance=task)
             new_task = form.save(commit=False)
-            user_id = request.POST.get('assigned_to')
-            if user_id:
-                new_task.assigned_to = User.objects.get(id=user_id)
             new_task.save()
+            assigned_users = request.POST.getlist('assigned_to')
+            if assigned_users:
+                new_task.assigned_to.set(User.objects.filter(id__in=assigned_users))
+
             messages.success(request, "Task saved successfully!")
             return redirect('task_panel_admin')
         else:
@@ -82,7 +83,8 @@ def task_panel_admin(request):
 
 @login_required
 def task_panel_user(request):
-    tasks = todolist.objects.filter(assigned_to=request.user)
+    tasks = todolist.objects.filter(assigned_to__in=[request.user])
+
 
     showing_completed = request.GET.get('completed') == 'true'
     showing_pending = request.GET.get('pending') == 'true'

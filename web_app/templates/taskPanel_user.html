@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
 {% block title %}User Task Panel{% endblock %}
 
@@ -41,7 +41,8 @@
     </div>
   {% endif %}
 
-  <div class="table-responsive mb-5">
+  
+  <div class="table-responsive mb-3">
     <table class="table table-striped table-bordered align-middle">
       <thead class="table-dark">
         <tr>
@@ -50,38 +51,39 @@
           <th>Due Date</th>
           <th>Description</th>
           <th>Status</th>
-          <th>People Involved</th>
-          <th>Update Status</th>
+          <th>Assigned Users</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
         {% for task in tasks %}
-          <tr class="{% if task.is_completed %}table-success{% elif task.is_due_soon %}table-danger{% endif %}">
-            <td>{{ task.id }}</td>
-            <td>{{ task.name }}</td>
-            <td>{{ task.due_date }}</td>
-            <td>{{ task.description }}</td>
-            <td>{{ task.status }}</td>
-            <td>{{ task.people_involved }}</td>
-            <td>
-              <button type="button" class="btn btn-sm btn-warning" onclick="editStatus(
-                '{{ task.id }}',
-                '{{ task.status }}'
-              )">Edit</button>
-
-              {% if task.status == "Completed" %}
-                <button type="button" class="btn btn-sm btn-success ms-2" disabled>Completed</button>
-              {% endif %}
-            </td>
-          </tr>
+        <tr class="{% if task.is_completed %}table-success{% elif task.is_due_soon %}table-danger{% endif %}">
+          <td>{{ task.id }}</td>
+          <td>{{ task.name }}</td>
+          <td>{{ task.due_date }}</td>
+          <td>{{ task.description }}</td>
+          <td>{{ task.status }}</td>
+          <td>
+            {% for user in task.assigned_to.all %}
+              <span class="badge bg-primary">{{ user.username }}</span>
+            {% endfor %}
+          </td>
+          <td>
+            {% if not task.is_completed %}
+              <button type="button" class="btn btn-sm btn-warning" onclick="openStatusEdit('{{ task.id }}', '{{ task.status }}')">Edit</button>
+            {% else %}
+              <span class="text-muted">Locked</span>
+            {% endif %}
+          </td>
+        </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 
-  <!-- Status Update Form -->
-  <div id="statusForm" class="border p-4 rounded bg-light mb-5" style="display: none;">
-    <h4 class="mb-3" id="formTitle">Update Task Status</h4>
+  
+  <div id="statusEditForm" class="border p-4 rounded bg-light mb-5" style="display: none;">
+    <h4 class="mb-3">Update Task Status</h4>
     <form method="post" action="{% url 'task_panel_user' %}">
       {% csrf_token %}
       <input type="hidden" name="task_id" id="edit_task_id">
@@ -92,27 +94,22 @@
           <option value="Completed">Completed</option>
         </select>
       </div>
-      <button type="submit" class="btn btn-primary">Save Status</button>
-      <button type="button" class="btn btn-secondary ms-2" onclick="toggleStatusForm()">Cancel</button>
+      <button type="submit" class="btn btn-primary">Update Status</button>
+      <button type="button" class="btn btn-secondary ms-2" onclick="hideStatusEdit()">Cancel</button>
     </form>
   </div>
 </div>
 
-<!-- JavaScript -->
 <script>
-  function toggleStatusForm() {
-    const form = document.getElementById('statusForm');
-    const isHidden = form.style.display === 'none';
-    form.style.display = isHidden ? 'block' : 'none';
-    if (isHidden) {
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-    }
+  function openStatusEdit(taskId, status) {
+    document.getElementById('edit_task_id').value = taskId;
+    document.getElementById('edit_status').value = status;
+    document.getElementById('statusEditForm').style.display = 'block';
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
   }
 
-  function editStatus(id, status) {
-    document.getElementById('edit_task_id').value = id;
-    document.getElementById('edit_status').value = status;
-    toggleStatusForm();
+  function hideStatusEdit() {
+    document.getElementById('statusEditForm').style.display = 'none';
   }
 
   window.addEventListener('DOMContentLoaded', () => {

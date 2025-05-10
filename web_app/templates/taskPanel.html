@@ -30,7 +30,7 @@
   {% endif %}
 </div>
 
-<!-- Display Messages -->
+
 {% if messages %}
   <div id="messageBox" class="alert alert-info">
     <ul class="mb-0">
@@ -51,7 +51,7 @@
         <th>Due Date</th>
         <th>Description</th>
         <th>Status</th>
-        <th>People Involved</th>
+        <th>Assigned Users</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -63,16 +63,17 @@
         <td>{{ task.due_date }}</td>
         <td>{{ task.description }}</td>
         <td>{{ task.status }}</td>
-        <td>{{ task.people_involved }}</td>
+
         <td>
-          <button type="button" class="btn btn-sm btn-warning" onclick="editTask(
-            '{{ task.id }}',
-            `{{ task.name|escapejs }}`,
-            '{{ task.due_date }}',
-            `{{ task.description|escapejs }}`,
-            '{{ task.status }}',
-            `{{ task.people_involved|escapejs }}`
-          )">Edit</button>
+          {% for user in task.assigned_to.all %}
+            <span class="badge bg-primary">{{ user.username }}</span>
+          {% empty %}
+            <span class="text-muted">No one assigned</span>
+          {% endfor %}
+        </td>
+        <td>
+          <button type="button" class="btn btn-sm btn-warning" onclick="editTask('{{ task.id }}', '{{ task.name|escapejs }}', '{{ task.due_date }}', '{{ task.description|escapejs }}', '{{ task.status }}', [{% for u in task.assigned_to.all %}'{{ u.id }}'{% if not forloop.last %}, {% endif %}{% endfor %}])">Edit</button>
+         
           <a href="?delete_id={{ task.id }}" class="btn btn-sm btn-danger ms-2" onclick="return confirm('Are you sure you want to delete this task?')">Delete</a>
         </td>
       </tr>
@@ -111,18 +112,15 @@
       </select>
     </div>
     <div class="mb-3">
-      <label for="people_involved" class="form-label">People Involved:</label>
-      <input type="text" name="people_involved" id="people_involved" class="form-control">
-    </div>
-    <div class="mb-3">
-      <label for="assigned_to" class="form-label">Assign to User:</label>
-      <select name="assigned_to" id="assigned_to" class="form-select">
+      <label for="assigned_to" class="form-label">Assign to Users:</label>
+      <select name="assigned_to" id="assigned_to" class="form-select" multiple size="5">
         {% for user in users %}
           <option value="{{ user.id }}">{{ user.username }}</option>
         {% endfor %}
       </select>
+      <div class="form-text">Hold Ctrl/Cmd or Shift to select multiple users.</div>
     </div>
-    
+
     <input type="hidden" name="task_id" id="task_id">
     <button type="submit" class="btn btn-primary">Save Task</button>
     <button type="button" class="btn btn-secondary ms-2" onclick="toggleForm()">Cancel</button>
@@ -132,20 +130,24 @@
 <script>
   function toggleForm() {
     const form = document.getElementById('taskForm');
-    const isHidden = form.style.display === 'none';
-    form.style.display = isHidden ? 'block' : 'none';
-    if (isHidden) {
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    if (form.style.display === 'block') {
       window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
   }
 
-  function editTask(id, name, dueDate, description, status, peopleInvolved) {
+  function editTask(id, name, dueDate, description, status, assignedUserIds) {
     document.getElementById('task_id').value = id;
     document.getElementById('name').value = name;
     document.getElementById('due_date').value = dueDate;
     document.getElementById('description').value = description;
     document.getElementById('status').value = status;
-    document.getElementById('people_involved').value = peopleInvolved;
+
+    const select = document.getElementById('assigned_to');
+    Array.from(select.options).forEach(option => {
+      option.selected = assignedUserIds.includes(option.value);
+    });
+
     toggleForm();
   }
 
