@@ -18,9 +18,7 @@ def login_view(request):
 
         if user is not None:
             auth_login(request, user)
-            if user.is_superuser:
-                return redirect('/admin/')
-            elif user.is_staff:
+            if user.is_superuser or user.is_staff:
                 return redirect('task_panel_admin')
             else:
                 return redirect('task_panel_user')
