@@ -6,7 +6,6 @@ class todolist(models.Model):
     due_date = models.DateField()
     description = models.TextField()
     status = models.CharField(max_length=100)
-    people_involved = models.CharField(max_length=255)
     assigned_to = models.ManyToManyField(User, blank=True)
 
     def __str__(self):

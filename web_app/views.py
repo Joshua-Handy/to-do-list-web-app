@@ -34,14 +34,18 @@ def task_panel_admin(request):
         form = TodoListForm(request.POST)
         if form.is_valid():
             task_id = request.POST.get('task_id')
+            assigned_users = request.POST.getlist('assigned_to')
+
             if task_id:
                 task = todolist.objects.get(pk=task_id)
                 form = TodoListForm(request.POST, instance=task)
-            new_task = form.save(commit=False)
-            new_task.save()
-            assigned_users = request.POST.getlist('assigned_to')
-            if assigned_users:
-                new_task.assigned_to.set(User.objects.filter(id__in=assigned_users))
+                task = form.save(commit=False)
+                task.save()
+                task.assigned_to.set(assigned_users)
+            else:
+                task = form.save()
+                if assigned_users:
+                    task.assigned_to.set(assigned_users)
 
             messages.success(request, "Task saved successfully!")
             return redirect('task_panel_admin')
@@ -83,8 +87,7 @@ def task_panel_admin(request):
 
 @login_required
 def task_panel_user(request):
-    tasks = todolist.objects.filter(assigned_to__in=[request.user])
-
+    tasks = todolist.objects.filter(assigned_to=request.user).distinct()
 
     showing_completed = request.GET.get('completed') == 'true'
     showing_pending = request.GET.get('pending') == 'true'
@@ -109,7 +112,7 @@ def task_panel_user(request):
                 task = todolist.objects.get(pk=task_id, assigned_to=request.user)
                 task.status = new_status
                 task.save()
-                messages.success(request, f"Task {task.name} updated.")
+                messages.success(request, f"Task '{task.name}' updated.")
             except todolist.DoesNotExist:
                 messages.error(request, "Task not found.")
         return redirect('task_panel_user')
@@ -120,14 +123,14 @@ def task_panel_user(request):
         'showing_pending': showing_pending,
     })
 
+
 def signup(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
             form.save()
             messages.success(request, 'Account created successfully! You can now log in.')
-            return redirect('login')  
+            return redirect('login')
     else:
         form = UserCreationForm()
     return render(request, 'signup.html', {'form': form})
-
