@@ -113,7 +113,8 @@
     </div>
     <div class="mb-3">
       <label for="assigned_to" class="form-label">Assign to Users:</label>
-      <select name="assigned_to" id="assigned_to" class="form-select" multiple size="5">
+      <select name="assigned_to" id="assigned_to" class="form-select" multiple required>
+        <option value="" disabled hidden>Select at least one user</option>
         {% for user in users %}
           <option value="{{ user.id }}">{{ user.username }}</option>
         {% endfor %}
